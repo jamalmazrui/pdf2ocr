@@ -14,7 +14,7 @@ GNU Lesser General Public License (LGPL)
 
 pdf2ocr (pdf2ocr.exe) is a command line utility under Windows that converts one or more PDF files to text using optical character recognition (OCR).  If a PDF includes a text layer, the text can usually be extracted.  Some PDFs, however, are image-only -- the result of a scanning process that takes a picture of each page, creating an image of text but not textual characters, themselves.  Other PDFs include a text layer but their settings make extracting the text difficult.
 
-pdf2ocr uses [Tesseract OCR](https://code.google.com/p/tesseract-ocr/wiki/ReadMe), which is generally considered to be the best, free, open source OCR at this time.
+pdf2ocr uses [Tesseract OCR](https://code.google.com/p/tesseract-ocr/wiki/ReadMe), which is generally considered to be the best, free, open source OCR at this time (sponsored by Google).
 
 ## Operation
 
@@ -28,10 +28,10 @@ Each converted file will have the same directory path and root name, differing o
 
 Up to three more parameters may optionally be passed after the file specification:  DPI, page segmentation mode, and language code.  The default dots per inch (DPI) is 300 for the temporary TIF image that is extracted for each PDF page.  The default page segmentation mode is 3 (explained in Tesseract documentation).  The default language code is "eng" for English.  Text in other languages may be recognized by adding support files from the Tesseract site to the "tessdata" subdirectory of the directory in which pdf2ocr is installed.
 
-The FileSpec parameter should be enclosed in quotes if it contains a space character.  Here is an example of a command that batch converts a specification with a space at 150 DPI in Spanish:  
-`pdf2ocr "c:\temp files\*.pdf" 150 spa`
+The FileSpec parameter should be enclosed in quotes if it contains a space character.  Here is an example using all four possible parameters:  a file specification that includes a space, 150 DPI, page layout mode 1, Spanish:  
+`pdf2ocr "c:\temp files\*.pdf" 150 1 spa`
 
-A sample, image-only PDF is included for testing pdf2ocr.  `debate.pdf` is a legal agreement on debate rules between U.S. Presidential candidates in 2004.
+A sample, image-only PDF is included for testing pdf2ocr.  `debate.pdf` is a public, legal agreement on debate rules between U.S. Presidential candidates in 2004.
 
 The pdf2ocr distribution may be installed in any directory, e.g., in `c:\pdf2ocr`.  If that directory is added to the Windows search path, pdf2ocr.exe may be run on the command line within any directory. 
 
