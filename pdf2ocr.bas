@@ -7,8 +7,8 @@
 #INCLUDE "C:\pdf2ocr\Private.inc"
 #INCLUDE "Win32API.inc"
 
-Global bDebugMode As Long
-GLOBAL sExe,sExePath AS STRING
+Global bDebugMode, bStandAlone As Long
+GLOBAL sExe,sExePath, sSayLineExe AS STRING
 
 FUNCTION GetCommandArgCount() AS LONG
     LOCAL i AS LONG
@@ -88,7 +88,12 @@ FUNCTION =i_return
 END FUNCTION
 
 FUNCTION PrintLine(Z AS STRING) AS LONG
- ' returns TRUE (non-zero) on success
+If IsFalse bStandAlone Then
+Say(z)
+Exit Function
+End if
+
+' returns TRUE (non-zero) on success
    LOCAL hStdOut AS LONG, nCharsWritten AS LONG
    LOCAL w AS STRING
    STATIC CSInitialized AS LONG, CS AS CRITICAL_SECTION
@@ -180,7 +185,9 @@ END FUNCTION
 
 FUNCTION Say(sText AS STRING) AS LONG
 DIM sExe AS STRING
-sExe = appPath$ & "SayLine.exe"
+
+If Len(Trim$(sText)) = 0 Then Exit Function
+sExe = Exe.Path$ + "SayLine.exe"
 SHELL(StringQuote(sExe) & sText, 0)
 END FUNCTION
 
@@ -195,9 +202,13 @@ Local vRange, vPassword, vGraphic, vPdf, vPage, vTxt, vImage, vUnlockKey As Vari
 ' bDebugMode = %True
 bDebugMode = %False
 
+sSayLineExe = Exe.Path$ + "SayLine.exe"
+If IsFalse IsFile(sSayLineExe) Then bStandAlone = %true
+
 sExe = EXE.FULL$
 sExePath = EXE.PATH$
 sLib = sExePath & "pdf2ocr.dll"
+If IsFalse IsFile(sLib) Then sLib = sExePath & "pdf2parts.dll"
 
 iDPI = 300
 sFormat = "tiff"
@@ -217,7 +228,8 @@ END IF
 IF iCount > 0 THEN
 sSpec = COMMAND$(1)
 sPdf = Dir$(sSpec)
-IF ISFALSE ISFILE(sPdf) THEN
+' IF ISFALSE ISFILE(sPdf) THEN
+If Len(sPdf) = 0 Then
 PrintLine("Cannot find file matching " & sSpec)
 EXIT FUNCTION
 END IF
@@ -242,7 +254,7 @@ sLang = COMMAND$(4)
 sIntro += " and language " +sLang
 END IF
 
-PrintLine(sIntro)
+If bStandAlone Then PrintLine(sIntro)
 
 sClsId = GUID$("{2E75DB15-9312-4902-8DA0-EAC34A6DD40C}")
 oLib = NewCom ClsId sClsId Lib sLib
@@ -251,6 +263,7 @@ vUnlockKey = sUnlockKey
 Object Call oLib.UnlockKey(vUnlockKey) To iResult
 
 While Len(sPdf) > 0
+sPdf = PathName$(PATH, sSpec) + sPdf
 vPdf = sPdf
 sPath = PATHNAME$(PATH, sPdf)
 sRoot = PATHNAME$(NAME, sPdf)
@@ -260,7 +273,7 @@ Object Call oLib.DAOpenFileReadOnly(vPdf, vPassword) To hPdf
 Object Call oLib.DAGetPageCount(hPdf) To iPageCount
 iPageWidth = GetWidth(iPageCount)
 PrintLine("")
-PrintLine(sBase & " = " & FORMAT$(iPageCount) & " " & StringPlural("page", iPageCount))
+If bStandAlone Then PrintLine(sBase & " = " & FORMAT$(iPageCount) & " " & StringPlural("page", iPageCount))
 
 FOR iPage = 1 TO iPageCount
 PrintLine("page " & Format$(iPage))
